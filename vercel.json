@@ -1,7 +1,7 @@
 {
     "version": 2,
     "env": {
-        "MONGO_URI": "@library_api_mongo_uri"
+        "MONGO_URL": "@library_api_mongo_uri"
     },
     "builds": [
         {
