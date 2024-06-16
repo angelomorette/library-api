@@ -1,25 +1,56 @@
-import { Injectable, NotAcceptableException } from '@nestjs/common';
+import {
+  Injectable,
+  NotAcceptableException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { User } from 'src/users/interface/user.interface';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UsersService
-  ) { }
+    private readonly userService: UsersService,
+    private jwtService: JwtService,
+  ) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.userService.getUser(username);
-    const passwordValid = await bcrypt.compare(password, user.password)
-    if (!user) {
-      throw new NotAcceptableException('could not find the user');
+  async signIn(
+    username: string,
+    password: string,
+  ): Promise<{ access_token: string }> {
+    try {
+      const user: User = await this.userService.findOne(username);
+
+      if (!user) {
+        throw new NotAcceptableException('could not find the user');
+      }
+
+      if (await bcrypt.compare(password, user.password)) {
+        const payload = { sub: user._id, username: user.username };
+        return {
+          access_token: await this.jwtService.signAsync(payload),
+        };
+      }
+    } catch (error) {
+      throw new UnauthorizedException();
     }
-    if (user && passwordValid) {
+  }
+
+  async refreshAccessToken(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: process.env.secret,
+      });
+      const newAccessToken = this.jwtService.sign(
+        { username: payload.username, sub: payload.sub },
+        { expiresIn: '7d' },
+      );
       return {
-        userId: user.id,
-        userName: user.username
+        access_token: newAccessToken,
       };
+    } catch (e) {
+      throw new UnauthorizedException();
     }
-    return null;
   }
 }

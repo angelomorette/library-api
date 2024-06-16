@@ -7,9 +7,6 @@ import { booksProviders } from './books.providers';
 @Module({
   imports: [DatabaseModule],
   controllers: [BooksController],
-  providers: [
-    BooksService,
-    ...booksProviders
-  ],
+  providers: [BooksService, ...booksProviders],
 })
-export class BooksModule { }
+export class BooksModule {}
