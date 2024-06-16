@@ -1,9 +1,5 @@
 {
     "version": 2,
-    "env": {
-        "MONGO_URI": "@mongo_uri",
-        "secret": "@secret"
-    },
     "builds": [
         {
             "src": "src/main.ts",
