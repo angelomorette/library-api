@@ -8,12 +8,12 @@ import { Model } from 'mongoose';
 export class BooksService {
   constructor(
     @Inject('BOOK_MODEL')
-    private bookModel: Model<Book>
-  ) { }
+    private bookModel: Model<Book>,
+  ) {}
 
   create(createBookDto: CreateBookDto) {
-    const createBook = new this.bookModel(createBookDto)
-    return createBook.save()
+    const createBook = new this.bookModel(createBookDto);
+    return createBook.save();
   }
 
   findAll(): Promise<Book[]> {

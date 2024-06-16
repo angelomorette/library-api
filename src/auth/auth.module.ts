@@ -1,12 +1,28 @@
-import { Module } from "@nestjs/common"
-import { PassportModule } from "@nestjs/passport"
-import { UsersModule } from "../users/users.module"
-import { AuthService } from "./auth.service"
-import { LocalStrategy } from "./local.strategy"
-import { SessionSerializer } from "./session.serializer"
+import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
+import { UsersModule } from '../users/users.module';
+import { AuthController } from './auth.controller';
+import { AuthGuard } from './auth.guard';
+import { AuthService } from './auth.service';
 
 @Module({
-  imports: [UsersModule, PassportModule.register({ session: true })],
-  providers: [AuthService, LocalStrategy, SessionSerializer],
+  imports: [
+    UsersModule,
+    JwtModule.register({
+      global: true,
+      secret: process.env.secret,
+      signOptions: { expiresIn: '1d' },
+    }),
+  ],
+  providers: [
+    AuthService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
+  controllers: [AuthController],
+  exports: [AuthService],
 })
-export class AuthModule { }
+export class AuthModule {}
